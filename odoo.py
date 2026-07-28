@@ -1,5 +1,6 @@
 import requests
 from config import ODOO_URL, HEADERS
+from datetime import datetime
 
 
 # =====================================================
@@ -110,7 +111,7 @@ def respuestas(user_input_id):
         if pregunta == "NOMBRE DEL EMPLEADO":
             orden["x_studio_nombre_de_empleado"] = valor
 
-        elif pregunta == "NOMBRE DEL HUESPED":
+        elif pregunta == "NOMBRE DEL CLIENTE":
             orden["x_studio_nombre_del_huesped"] = valor
 
         elif pregunta == "CONTACTO DEL HUESPED":
@@ -150,7 +151,7 @@ def respuestas(user_input_id):
 👤 EMPLEADO:
 {orden.get('x_studio_nombre_de_empleado','')}
 
-🙋 HUESPED:
+🙋 CLIENTE:
 {orden.get('x_studio_nombre_del_huesped','')}
 
 🛎 SERVICIO:
@@ -334,3 +335,57 @@ def publicar_en_canal(mensaje):
 # =====================================================
 # ENVIAR CORREO
 # =====================================================
+# =====================================================
+# REGISTRAR LOG DE AUTOMATIZACION
+# =====================================================
+
+def registrar_log(
+    id_encuesta,
+    cliente="",
+    servicio="",
+    id_orden=0,
+    estado="procesada",
+    canal=False,
+    correo=False,
+    error=""
+):
+
+    payload = {
+        "vals_list": [
+            {
+                "x_name": f"Encuesta {id_encuesta}",
+
+                "x_studio_fecha_ejecucion": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+
+                "x_studio_id_encuesta": id_encuesta,
+
+                "x_studio_cliente": cliente,
+
+                "x_studio_servicio": servicio,
+
+                "x_studio_id_orden": id_orden,
+
+                "x_studio_estado": estado,
+
+                "x_studio_canal_publicado": canal,
+
+                "x_studio_correo_enviado": correo,
+
+                "x_studio_error": error,
+            }
+        ]
+    }
+
+    r = requests.post(
+        f"{ODOO_URL}/json/2/x_log_automatizaciones/create",
+        headers=HEADERS,
+        json=payload,
+    )
+
+    print("\n========================")
+    print("LOG AUTOMATIZACION")
+    print("========================")
+    print(r.status_code)
+    print(r.text)
+
+    return r

@@ -7,6 +7,7 @@ from odoo import (
     leer_orden,
     publicar_en_canal,
     orden_existente,
+    registrar_log,
 )
 
 app = Flask(__name__)
@@ -50,12 +51,18 @@ print(type(data))
     # Evitar órdenes duplicadas
     if orden_existente(id_encuesta):
 
-        print("La orden ya existe.")
+    registrar_log(
+        id_encuesta=id_encuesta,
+        estado="duplicada",
+        error="La encuesta ya tenía una Orden de Servicio."
+    )
 
-        return jsonify({
-            "status": "ok",
-            "message": "Orden ya creada"
-        })
+    print("La orden ya existe.")
+
+    return jsonify({
+        "status": "ok",
+        "message": "Orden ya creada"
+    })
 
     encuesta = encuesta_por_id(id_encuesta)
 
@@ -75,10 +82,20 @@ print(type(data))
 
     if respuesta.status_code != 200:
 
-        return jsonify({
-            "status": "error",
-            "message": respuesta.text
-        }), 500
+    registrar_log(
+        id_encuesta=id_encuesta,
+        cliente=orden.get("x_studio_nombre_del_cliente", ""),
+        servicio=orden.get("x_studio_tipo_de_servicio", ""),
+        estado="error",
+        canal=False,
+        correo=False,
+        error=respuesta.text
+    )
+
+    return jsonify({
+        "status": "error",
+        "message": respuesta.text
+    }), 500
 
     id_orden = respuesta.json()[0]
 
@@ -91,6 +108,16 @@ print(type(data))
 
     if mensaje:
         publicar_en_canal(mensaje)
+    registrar_log(
+    id_encuesta=id_encuesta,
+    cliente=orden.get("x_studio_nombre_del_cliente", ""),
+    servicio=orden.get("x_studio_tipo_de_servicio", ""),
+    id_orden=id_orden,
+    estado="procesada",
+    canal=True,
+    correo=False,
+    error=""
+)    
 
     print("\n========================")
     print("ORDEN CREADA CORRECTAMENTE")

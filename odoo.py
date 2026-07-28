@@ -31,6 +31,28 @@ def ultima_encuesta():
 
     return None
 
+# =====================================================
+# BUSCAR ENCUESTA POR ID
+# =====================================================
+
+def encuesta_por_id(id_encuesta):
+
+    r = requests.post(
+        f"{ODOO_URL}/json/2/survey.user_input/read",
+        headers=HEADERS,
+        json={
+            "ids": [id_encuesta],
+            "fields": ["id", "display_name"]
+        }
+    )
+
+    datos = r.json()
+
+    if not datos:
+        return None
+
+    return datos[0]
+
 
 # =====================================================
 # LEER RESPUESTAS

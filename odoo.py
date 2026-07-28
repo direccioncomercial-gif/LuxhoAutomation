@@ -148,8 +148,6 @@ def respuestas(user_input_id):
     mensaje = f"""
 🚗 NUEVA ORDEN DE SERVICIO - LUXHO
 
-👤 EMPLEADO:
-{orden.get('x_studio_nombre_de_empleado','')}
 
 🙋 CLIENTE:
 {orden.get('x_studio_nombre_del_huesped','')}
@@ -177,6 +175,9 @@ def respuestas(user_input_id):
 
 📝 OBSERVACIONES:
 {orden.get('x_studio_observaciones','')}
+
+💰 VALOR DEL SERVICIO:
+Pendiente de asignar
 """
 
     orden["x_studio_mensaje_de_whatsapp"] = mensaje

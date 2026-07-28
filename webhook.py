@@ -20,12 +20,23 @@ def home():
 @app.route("/webhook", methods=["POST"])
 def webhook():
 
-    data = request.json
-
     print("\n========================")
-    print("WEBHOOK RECIBIDO")
-    print("========================")
-    print(data)
+print("WEBHOOK RECIBIDO")
+print("========================")
+
+print("JSON:")
+print(request.get_json(silent=True))
+
+print("\nFORM:")
+print(request.form.to_dict())
+
+print("\nRAW:")
+print(request.data)
+
+data = request.get_json(silent=True)
+
+print("\nTIPO DE DATA:")
+print(type(data))
 
     # ID enviado por Odoo
     id_encuesta = data.get("id")

@@ -86,27 +86,29 @@ def respuestas(user_input_id):
     for linea in datos:
 
         pregunta = linea["question_id"][1]
+        print(f"PREGUNTA: [{pregunta}]")
+        print(f"VALOR: [{valor}]")
 
-        if linea["value_char_box"]:
+            if linea["value_char_box"]:
             valor = linea["value_char_box"]
 
         elif linea["value_datetime"]:
             valor = linea["value_datetime"]
 
         elif linea["suggested_answer_id"]:
-
             valor = linea["suggested_answer_id"][1]
 
             if " : " in valor:
                 valor = valor.split(" : ")[1]
 
         elif linea["value_numerical_box"]:
-
             valor = str(int(linea["value_numerical_box"]))
 
         else:
-
             valor = ""
+
+        print(f"PREGUNTA: [{pregunta}]")
+        print(f"VALOR: [{valor}]")
 
         if pregunta == "NOMBRE DEL EMPLEADO":
             orden["x_studio_nombre_de_empleado"] = valor

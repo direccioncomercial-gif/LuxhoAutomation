@@ -1,10 +1,4 @@
 from datetime import datetime
-
-@app.before_request
-def log_request():
-    print("=" * 60)
-    print(f"[{datetime.now()}] {request.method} {request.path}")
-
 from flask import Flask, request, jsonify
 
 from odoo import (
@@ -18,6 +12,12 @@ from odoo import (
 )
 
 app = Flask(__name__)
+
+
+@app.before_request
+def log_request():
+    print("=" * 60)
+    print(f"[{datetime.now()}] {request.method} {request.path}")
 
 
 @app.route("/", methods=["GET"])

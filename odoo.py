@@ -62,18 +62,7 @@ def encuesta_por_id(id_encuesta):
 def respuestas(user_input_id):
 
     r = requests.post(
-        f"{ODOO_URL}/json/2/survey.user_input.line/search_read",
-        headers=HEADERS,
-        json={
-            "domain": [["user_input_id", "=", user_input_id]],
-            "fields": [
-                "question_id",
-                "value_char_box",
-                "value_datetime",
-                "value_numerical_box",
-                "suggested_answer_id"
-            ]
-        }
+        ...
     )
 
     datos = r.json()
@@ -86,10 +75,8 @@ def respuestas(user_input_id):
     for linea in datos:
 
         pregunta = linea["question_id"][1]
-        print(f"PREGUNTA: [{pregunta}]")
-        print(f"VALOR: [{valor}]")
 
-            if linea["value_char_box"]:
+        if linea["value_char_box"]:
             valor = linea["value_char_box"]
 
         elif linea["value_datetime"]:
@@ -99,7 +86,7 @@ def respuestas(user_input_id):
             valor = linea["suggested_answer_id"][1]
 
             if " : " in valor:
-                valor = valor.split(" : ")[1]
+            valor = valor.split(" : ")[1]
 
         elif linea["value_numerical_box"]:
             valor = str(int(linea["value_numerical_box"]))
@@ -143,13 +130,8 @@ def respuestas(user_input_id):
         elif pregunta == "OBSERVACIONES EXTRA DEL SERVICIO":
             orden["x_studio_observaciones"] = valor
 
-    # =====================================================
-    # MENSAJE OPERATIVO
-    # =====================================================
-
     mensaje = f"""
 🚗 NUEVA ORDEN DE SERVICIO - LUXHO
-
 
 🙋 CLIENTE:
 {orden.get('x_studio_nombre_del_huesped','')}
@@ -185,6 +167,7 @@ Pendiente de asignar
     orden["x_studio_mensaje_de_whatsapp"] = mensaje
 
     return orden
+
 # =====================================================
 # CREAR ORDEN
 # =====================================================

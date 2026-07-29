@@ -1,3 +1,10 @@
+from datetime import datetime
+
+@app.before_request
+def log_request():
+    print("=" * 60)
+    print(f"[{datetime.now()}] {request.method} {request.path}")
+
 from flask import Flask, request, jsonify
 
 from odoo import (
@@ -95,7 +102,7 @@ def webhook():
 
         registrar_log(
             id_encuesta=id_encuesta,
-            cliente=orden.get("x_studio_nombre_del_cliente", ""),
+            cliente=orden.get("x_studio_nombre_del_huesped", ""),
             servicio=orden.get("x_studio_tipo_de_servicio", ""),
             estado="error",
             canal=False,
@@ -142,7 +149,7 @@ def webhook():
 
     registrar_log(
         id_encuesta=id_encuesta,
-        cliente=orden.get("x_studio_nombre_del_cliente", ""),
+        cliente=orden.get("x_studio_nombre_del_huesped", ""),
         servicio=orden.get("x_studio_tipo_de_servicio", ""),
         id_orden=id_orden,
         estado="procesada",

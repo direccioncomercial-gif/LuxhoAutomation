@@ -19,7 +19,6 @@ def log_request():
     print("=" * 60)
     print(f"[{datetime.now()}] {request.method} {request.path}")
 
-
 @app.route("/", methods=["GET"])
 def home():
     return "Luxho Automation Webhook OK"

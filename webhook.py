@@ -31,8 +31,6 @@ def webhook():
     print("WEBHOOK RECIBIDO")
     print("====================================")
 
-    try:
-
     print("\nJSON:")
     print(request.get_json(silent=True))
 

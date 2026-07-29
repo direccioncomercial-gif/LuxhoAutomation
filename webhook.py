@@ -31,6 +31,8 @@ def webhook():
     print("WEBHOOK RECIBIDO")
     print("====================================")
 
+    try:
+
     print("\nJSON:")
     print(request.get_json(silent=True))
 
@@ -167,6 +169,18 @@ def webhook():
         "status": "ok"
     })
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    import traceback
+
+    print("\n========== ERROR NO CONTROLADO ==========")
+    traceback.print_exc()
+    print("=========================================\n")
+
+    return jsonify({
+        "status": "error",
+        "message": str(e)
+    }), 500
 
 if __name__ == "__main__":
     app.run(

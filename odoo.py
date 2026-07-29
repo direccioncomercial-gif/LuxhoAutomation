@@ -60,6 +60,124 @@ def encuesta_por_id(id_encuesta):
 # =====================================================
 
 def respuestas(user_input_id):
+
+    r = requests.post(
+        f"{ODOO_URL}/json/2/survey.user_input.line/search_read",
+        headers=HEADERS,
+        json={
+            "domain": [["user_input_id", "=", user_input_id]],
+            "fields": [
+                "question_id",
+                "value_char_box",
+                "value_datetime",
+                "value_numerical_box",
+                "suggested_answer_id"
+            ]
+        }
+    )
+
+    datos = r.json()
+
+    print("Respuesta líneas:")
+    print(datos)
+
+    orden = {}
+
+    for linea in datos:
+
+        pregunta = linea["question_id"][1].strip().upper()
+
+        if linea["value_char_box"]:
+            valor = linea["value_char_box"]
+
+        elif linea["value_datetime"]:
+            valor = linea["value_datetime"]
+
+        elif linea["suggested_answer_id"]:
+            valor = linea["suggested_answer_id"][1]
+
+            if " : " in valor:
+                valor = valor.split(" : ")[1]
+
+        elif linea["value_numerical_box"]:
+            valor = str(int(linea["value_numerical_box"]))
+
+        else:
+            valor = ""
+
+        print(f"PREGUNTA: [{pregunta}]")
+        print(f"VALOR: [{valor}]")
+
+        if "NOMBRE DEL EMPLEADO" in pregunta:
+            orden["x_studio_nombre_de_empleado"] = valor
+
+        elif "NOMBRE DEL CLIENTE" in pregunta or "NOMBRE DEL HUÉSPED" in pregunta or "NOMBRE DEL HUESPED" in pregunta:
+            orden["x_studio_nombre_del_huesped"] = valor
+
+        elif "CONTACTO DEL HUESPED" in pregunta or "CONTACTO DEL HUÉSPED" in pregunta:
+            orden["x_studio_contacto_del_huesped"] = valor
+
+        elif "SERVICIO" in pregunta or "TIPO DE SERVICIO" in pregunta:
+            orden["x_studio_tipo_de_servicio"] = valor
+
+        elif "TIPO DE VEHICULO" in pregunta or "TIPO DE VEHÍCULO" in pregunta:
+            orden["x_studio_tipo_de_vehiculo"] = valor
+
+        elif "HORA DEL SERVICIO" in pregunta or "FECHA" in pregunta:
+            orden["x_studio_fecha_y_hora"] = valor
+
+        elif "NUMERO DE VUELO" in pregunta or "NÚMERO DE VUELO" in pregunta:
+            orden["x_studio_numero_de_vuelo"] = valor
+
+        elif "ORIGEN" in pregunta:
+            orden["x_studio_origen"] = valor
+
+        elif "DESTINO" in pregunta:
+            orden["x_studio_destino"] = valor
+
+        elif "HOTEL" in pregunta:
+            orden["x_studio_hotel"] = valor
+
+        elif "OBSERVACIONES" in pregunta:
+            orden["x_studio_observaciones"] = valor
+
+    mensaje = f"""
+🚗 NUEVA ORDEN DE SERVICIO - LUXHO
+
+🙋 CLIENTE:
+{orden.get('x_studio_nombre_del_huesped','')}
+
+🛎 SERVICIO:
+{orden.get('x_studio_tipo_de_servicio','')}
+
+🚘 VEHICULO:
+{orden.get('x_studio_tipo_de_vehiculo','')}
+
+📅 FECHA:
+{orden.get('x_studio_fecha_y_hora','')}
+
+✈ VUELO:
+{orden.get('x_studio_numero_de_vuelo','')}
+
+📍 ORIGEN:
+{orden.get('x_studio_origen','')}
+
+📍 DESTINO:
+{orden.get('x_studio_destino','')}
+
+🏨 HOTEL:
+{orden.get('x_studio_hotel','')}
+
+📝 OBSERVACIONES:
+{orden.get('x_studio_observaciones','')}
+
+💰 VALOR DEL SERVICIO:
+Pendiente de asignar
+""".strip()
+
+    orden["x_studio_mensaje_de_whatsapp"] = mensaje
+
+    return orden    
 # =====================================================
 # CREAR ORDEN
 # =====================================================

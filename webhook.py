@@ -48,6 +48,12 @@ def webhook():
     id_encuesta = data.get("id")
 
     print(f"\nID ENCUESTA: {id_encuesta}")
+    from config import ODOO_URL, ODOO_API_KEY
+
+    print("================================")
+    print("ODOO_URL:", ODOO_URL)
+    print("API KEY EXISTE:", bool(ODOO_API_KEY))
+    print("================================")
 
     if not id_encuesta:
         print("No llegó el ID de la encuesta")
@@ -183,6 +189,7 @@ def handle_exception(e):
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=int(os.environ.get("PORT", 5000)),
         debug=False
     )
+    

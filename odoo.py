@@ -22,15 +22,21 @@ def ultima_encuesta():
 
     encuestas = r.json()
 
-    print("Respuesta encuesta:")
+    print("\n========================")
+    print("ENCUESTAS ENCONTRADAS")
+    print("========================")
     print(encuestas)
 
     for encuesta in encuestas:
 
         if not orden_existente(encuesta["id"]):
+            print(f"Se procesará la encuesta {encuesta['id']}")
             return encuesta
 
+    print("No hay encuestas pendientes.")
+
     return None
+
 
 # =====================================================
 # BUSCAR ENCUESTA POR ID
@@ -43,7 +49,10 @@ def encuesta_por_id(id_encuesta):
         headers=HEADERS,
         json={
             "ids": [id_encuesta],
-            "fields": ["id", "display_name"]
+            "fields": [
+                "id",
+                "display_name"
+            ]
         }
     )
 
@@ -65,7 +74,9 @@ def respuestas(user_input_id):
         f"{ODOO_URL}/json/2/survey.user_input.line/search_read",
         headers=HEADERS,
         json={
-            "domain": [["user_input_id", "=", user_input_id]],
+            "domain": [
+                ["user_input_id", "=", user_input_id]
+            ],
             "fields": [
                 "question_id",
                 "value_char_box",
@@ -78,68 +89,107 @@ def respuestas(user_input_id):
 
     datos = r.json()
 
-    print("Respuesta líneas:")
-    print(datos)
+    print("\n================================")
+    print("RESPUESTAS DE LA ENCUESTA")
+    print("================================")
 
     orden = {}
 
+    mapa = {
+
+        "NOMBRE DEL EMPLEADO":
+            "x_studio_nombre_de_empleado",
+
+        "NOMBRE DEL HUESPED":
+            "x_studio_nombre_del_huesped",
+
+        "NOMBRE DEL HUÉSPED":
+            "x_studio_nombre_del_huesped",
+
+        "NOMBRE DEL CLIENTE":
+            "x_studio_nombre_del_huesped",
+
+        "CONTACTO DEL HUESPED":
+            "x_studio_contacto_del_huesped",
+
+        "CONTACTO DEL HUÉSPED":
+            "x_studio_contacto_del_huesped",
+
+        "SERVICIO":
+            "x_studio_tipo_de_servicio",
+
+        "TIPO DE SERVICIO":
+            "x_studio_tipo_de_servicio",
+
+        "TIPO DE VEHICULO":
+            "x_studio_tipo_de_vehiculo",
+
+        "TIPO DE VEHÍCULO":
+            "x_studio_tipo_de_vehiculo",
+
+        "HORA DEL SERVICIO":
+            "x_studio_fecha_y_hora",
+
+        "FECHA":
+            "x_studio_fecha_y_hora",
+
+        "NUMERO DE VUELO":
+            "x_studio_numero_de_vuelo",
+
+        "NÚMERO DE VUELO":
+            "x_studio_numero_de_vuelo",
+
+        "ORIGEN":
+            "x_studio_origen",
+
+        "DESTINO":
+            "x_studio_destino",
+
+        "HOTEL":
+            "x_studio_hotel",
+
+        "OBSERVACIONES EXTRA DEL SERVICIO":
+            "x_studio_observaciones",
+
+        "OBSERVACIONES":
+            "x_studio_observaciones",
+    }
+
     for linea in datos:
+
+        print("--------------------------------")
+        print(linea)
 
         pregunta = linea["question_id"][1].strip().upper()
 
-        if linea["value_char_box"]:
+        valor = ""
+
+        if linea.get("value_char_box"):
             valor = linea["value_char_box"]
 
-        elif linea["value_datetime"]:
-            valor = linea["value_datetime"]
+        elif linea.get("suggested_answer_id"):
 
-        elif linea["suggested_answer_id"]:
+            print("SUGGESTED ANSWER:")
+            print(linea["suggested_answer_id"])
+
             valor = linea["suggested_answer_id"][1]
 
             if " : " in valor:
-                valor = valor.split(" : ")[1]
+                valor = valor.split(" : ", 1)[1]
 
-        elif linea["value_numerical_box"]:
+        elif linea.get("value_datetime"):
+            valor = linea["value_datetime"]
+
+        elif linea.get("value_numerical_box"):
             valor = str(int(linea["value_numerical_box"]))
 
-        else:
-            valor = ""
+        print(f"PREGUNTA: {pregunta}")
+        print(f"VALOR: {valor}")
 
-        print(f"PREGUNTA: [{pregunta}]")
-        print(f"VALOR: [{valor}]")
+        campo = mapa.get(pregunta)
 
-        if "NOMBRE DEL EMPLEADO" in pregunta:
-            orden["x_studio_nombre_de_empleado"] = valor
-
-        elif "NOMBRE DEL CLIENTE" in pregunta or "NOMBRE DEL HUÉSPED" in pregunta or "NOMBRE DEL HUESPED" in pregunta:
-            orden["x_studio_nombre_del_huesped"] = valor
-
-        elif "CONTACTO DEL HUESPED" in pregunta or "CONTACTO DEL HUÉSPED" in pregunta:
-            orden["x_studio_contacto_del_huesped"] = valor
-
-        elif "SERVICIO" in pregunta or "TIPO DE SERVICIO" in pregunta:
-            orden["x_studio_tipo_de_servicio"] = valor
-
-        elif "TIPO DE VEHICULO" in pregunta or "TIPO DE VEHÍCULO" in pregunta:
-            orden["x_studio_tipo_de_vehiculo"] = valor
-
-        elif "HORA DEL SERVICIO" in pregunta or "FECHA" in pregunta:
-            orden["x_studio_fecha_y_hora"] = valor
-
-        elif "NUMERO DE VUELO" in pregunta or "NÚMERO DE VUELO" in pregunta:
-            orden["x_studio_numero_de_vuelo"] = valor
-
-        elif "ORIGEN" in pregunta:
-            orden["x_studio_origen"] = valor
-
-        elif "DESTINO" in pregunta:
-            orden["x_studio_destino"] = valor
-
-        elif "HOTEL" in pregunta:
-            orden["x_studio_hotel"] = valor
-
-        elif "OBSERVACIONES" in pregunta:
-            orden["x_studio_observaciones"] = valor
+        if campo:
+            orden[campo] = valor
 
     mensaje = f"""
 🚗 NUEVA ORDEN DE SERVICIO - LUXHO
@@ -177,15 +227,37 @@ Pendiente de asignar
 
     orden["x_studio_mensaje_de_whatsapp"] = mensaje
 
-    return orden    
+    print("\n================================")
+    print("ORDEN CONSTRUIDA")
+    print("================================")
+    print(orden)
+
+    return orden
 # =====================================================
 # CREAR ORDEN
 # =====================================================
 
 def crear_orden(orden):
 
+    tipo_servicio = (
+        orden.get("x_studio_tipo_de_servicio") or ""
+    ).strip().upper()
+
+    if not tipo_servicio:
+
+        print("\n==============================")
+        print("ERROR: SERVICIO VACÍO")
+        print("==============================")
+        print(orden)
+
+        raise Exception(
+            "La encuesta no devolvió ningún valor para la pregunta SERVICIO."
+        )
+
+    orden["x_studio_tipo_de_servicio"] = tipo_servicio
+
     orden["x_name"] = (
-        f"{orden.get('x_studio_tipo_de_servicio','')} - "
+        f"{tipo_servicio} - "
         f"{orden.get('x_studio_nombre_del_huesped','')}"
     )
 
@@ -196,7 +268,7 @@ def crear_orden(orden):
     }
 
     print("\n========================")
-    print("ENVIANDO A ODOO")
+    print("JSON QUE SE ENVIARÁ A ODOO")
     print("========================")
     print(payload)
 
@@ -209,7 +281,7 @@ def crear_orden(orden):
     print("\n========================")
     print("RESPUESTA ODOO")
     print("========================")
-    print("Código HTTP:", r.status_code)
+    print("HTTP:", r.status_code)
     print(r.text)
 
     return r
@@ -228,7 +300,9 @@ def orden_existente(id_survey):
             "domain": [
                 ["x_studio_id_survey", "=", id_survey]
             ],
-            "fields": ["id"],
+            "fields": [
+                "id"
+            ],
             "limit": 1
         }
     )
@@ -257,7 +331,12 @@ def leer_orden(id_orden):
         }
     )
 
-    return r.json()[0]
+    datos = r.json()
+
+    if not datos:
+        return None
+
+    return datos[0]
 
 
 # =====================================================
@@ -322,17 +401,18 @@ def publicar_en_canal(mensaje):
     print("========================")
     print(r.status_code)
     print(r.text)
-
-
-# =====================================================
+    # =====================================================
 # CREAR CORREO
 # =====================================================
+
 
 # =====================================================
 # ENVIAR CORREO
 # =====================================================
+
+
 # =====================================================
-# REGISTRAR LOG DE AUTOMATIZACION
+# REGISTRAR LOG DE AUTOMATIZACIÓN
 # =====================================================
 
 def registrar_log(
@@ -350,38 +430,51 @@ def registrar_log(
         "vals_list": [
             {
                 "x_name": f"Encuesta {id_encuesta}",
-
                 "x_studio_fecha_ejecucion": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-
                 "x_studio_id_encuesta": id_encuesta,
-
                 "x_studio_cliente": cliente,
-
                 "x_studio_servicio": servicio,
-
                 "x_studio_id_orden": id_orden,
-
                 "x_studio_estado": estado,
-
                 "x_studio_canal_publicado": canal,
-
                 "x_studio_correo_enviado": correo,
-
                 "x_studio_error": error,
             }
         ]
     }
 
-    r = requests.post(
-        f"{ODOO_URL}/json/2/x_log_automatizaciones/create",
-        headers=HEADERS,
-        json=payload,
-    )
-
     print("\n========================")
-    print("LOG AUTOMATIZACION")
+    print("REGISTRANDO LOG")
     print("========================")
-    print(r.status_code)
-    print(r.text)
+    print(payload)
 
-    return r
+    try:
+
+        r = requests.post(
+            f"{ODOO_URL}/json/2/x_log_automatizaciones/create",
+            headers=HEADERS,
+            json=payload,
+            timeout=30
+        )
+
+        print("\n========================")
+        print("RESPUESTA LOG")
+        print("========================")
+        print("HTTP:", r.status_code)
+        print(r.text)
+
+        if r.status_code == 404:
+            print("El modelo x_log_automatizaciones no existe. Se continúa sin registrar el log.")
+            return None
+
+        return r
+
+    except Exception as e:
+
+        print("\n========================")
+        print("ERROR REGISTRANDO LOG")
+        print("========================")
+        print(str(e))
+
+        # El log nunca debe detener la automatización
+        return None
